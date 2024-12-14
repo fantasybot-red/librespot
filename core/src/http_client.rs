@@ -115,13 +115,7 @@ impl HttpClient {
             _ => ("Linux", zero_str),
         };
 
-        let user_agent_str = &format!(
-            "Spotify/{} {}/{} ({})",
-            spotify_version(),
-            spotify_platform,
-            os_version,
-            VERSION_STRING
-        );
+        let user_agent_str = "Spotify/900000537 CFNetwork/1568.200.51 Darwin/24.1.0";
 
         let user_agent = HeaderValue::from_str(user_agent_str).unwrap_or_else(|err| {
             error!("Invalid user agent <{}>: {}", user_agent_str, err);
