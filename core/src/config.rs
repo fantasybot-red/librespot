@@ -32,7 +32,7 @@ pub struct SessionConfig {
 }
 
 impl SessionConfig {
-    pub(crate) fn default_for_os(os: &str) -> Self {
+    pub fn default_for_os(os: &str) -> Self {
         let device_id = uuid::Uuid::new_v4().as_hyphenated().to_string();
         let client_id = match os {
             "android" => ANDROID_CLIENT_ID,
