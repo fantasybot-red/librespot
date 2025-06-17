@@ -96,12 +96,10 @@ pub fn find(name: Option<&str>) -> Result<DnsSdServiceBuilder, Error> {
         match BACKENDS.iter().find(|(id, _)| name == id) {
             Some((_id, Some(launch_svc))) => Ok(*launch_svc),
             Some((_id, None)) => Err(Error::unavailable(format!(
-                "librespot built without '{}' support",
-                name
+                "librespot built without '{name}' support"
             ))),
             None => Err(Error::not_found(format!(
-                "unknown zeroconf backend '{}'",
-                name
+                "unknown zeroconf backend '{name}'"
             ))),
         }
     } else {
@@ -286,14 +284,14 @@ async fn avahi_task(
                             //
                             // EntryGroup has been withdrawn at this point already!
                             log::error!("zeroconf collision for name '{}'", &name);
-                            return Err(zbus::Error::Failure(format!("zeroconf collision for name: {}", name)).into());
+                            return Err(zbus::Error::Failure(format!("zeroconf collision for name: {name}")).into());
                         }
                         EntryGroupState::Failure => {
                             // TODO: Back off/treat as fatal?
                             // EntryGroup has been withdrawn at this point already!
                             // There seems to be no code in Avahi that actually sets this state.
                             log::error!("zeroconf failure: {}", error);
-                            return Err(zbus::Error::Failure(format!("zeroconf failure: {}", error)).into());
+                            return Err(zbus::Error::Failure(format!("zeroconf failure: {error}")).into());
                         }
                     }
                 }
@@ -396,7 +394,7 @@ fn launch_libmdns(
 
     let task_handle = tokio::task::spawn_blocking(move || {
         let inner = move || -> Result<(), DiscoveryError> {
-            let svc = if !zeroconf_ip.is_empty() {
+            let responder = if !zeroconf_ip.is_empty() {
                 libmdns::Responder::spawn_with_ip_list(
                     &tokio::runtime::Handle::current(),
                     zeroconf_ip,
@@ -404,9 +402,9 @@ fn launch_libmdns(
             } else {
                 libmdns::Responder::spawn(&tokio::runtime::Handle::current())
             }
-            .map_err(|e| DiscoveryError::DnsSdError(Box::new(e)))
-            .unwrap()
-            .register(
+            .map_err(|e| DiscoveryError::DnsSdError(Box::new(e)))?;
+
+            let svc = responder.register(
                 DNS_SD_SERVICE_NAME.to_owned(),
                 name.into_owned(),
                 port,
