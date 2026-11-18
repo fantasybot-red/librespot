@@ -11,6 +11,14 @@ pub(crate) const IOS_CLIENT_ID: &str = "58bd3c95768941ea9eb4350aaa033eb3";
 // android or ios needs to be mocked, the `os_version` has to be set to a valid version.
 // Otherwise, client-token or login5 requests will fail with a generic invalid-credential error.
 /// See [std::env::consts::OS]
+///
+/// fantasybot-red fork: on iOS, identify as macOS. Spotify's access points answer every login
+/// from librespot's iOS identity with `TryAnotherAP`, while the macOS identity (desktop client
+/// id, OSX client-token data) logs in with the same OAuth token.
+#[cfg(target_os = "ios")]
+pub const OS: &str = "macos";
+/// See [std::env::consts::OS]
+#[cfg(not(target_os = "ios"))]
 pub const OS: &str = std::env::consts::OS;
 
 // valid versions for some os:
